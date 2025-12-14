@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8082/patient-service/api/v1/patients';
+const API_BASE_URL = 'http://localhost:8082/api/v1/patients';
 
 // State
 let allPatients = [];
@@ -16,7 +16,7 @@ function showSection(sectionId) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     document.getElementById(sectionId).classList.add('active');
     event.currentTarget.classList.add('active');
 }
@@ -35,10 +35,10 @@ async function fetchPatients() {
     try {
         const response = await fetch(API_BASE_URL);
         if (!response.ok) throw new Error('Failed to fetch patients');
-        
+
         const data = await response.json();
         allPatients = data;
-        
+
         updateDashboardStats(data);
         renderRecentPatients(data);
         renderAllPatients(data);
@@ -56,10 +56,10 @@ function updateDashboardStats(patients) {
 function renderRecentPatients(patients) {
     const tbody = document.getElementById('recentPatientsTableBody');
     tbody.innerHTML = '';
-    
+
     // Show last 5 patients
     const recent = patients.slice(-5).reverse();
-    
+
     recent.forEach(patient => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -82,7 +82,7 @@ function renderRecentPatients(patients) {
 function renderAllPatients(patients) {
     const tbody = document.getElementById('allPatientsTableBody');
     tbody.innerHTML = '';
-    
+
     patients.forEach(patient => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -111,15 +111,15 @@ function renderAllPatients(patients) {
 function calculateAge(dob) {
     const birthDate = new Date(dob);
     const difference = Date.now() - birthDate.getTime();
-    const ageDate = new Date(difference); 
+    const ageDate = new Date(difference);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
 // Search
 function searchPatients() {
     const query = document.getElementById('patientSearchInput').value.toLowerCase();
-    const filtered = allPatients.filter(p => 
-        p.firstName.toLowerCase().includes(query) || 
+    const filtered = allPatients.filter(p =>
+        p.firstName.toLowerCase().includes(query) ||
         p.lastName.toLowerCase().includes(query) ||
         p.email.toLowerCase().includes(query)
     );
@@ -129,10 +129,10 @@ function searchPatients() {
 // Add Patient
 document.getElementById('addPatientForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
     const patientData = Object.fromEntries(formData.entries());
-    
+
     try {
         const response = await fetch(API_BASE_URL, {
             method: 'POST',
@@ -159,7 +159,7 @@ document.getElementById('addPatientForm').addEventListener('submit', async (e) =
 
 // Delete Patient
 async function deletePatient(id) {
-    if(confirm('Are you sure you want to delete this patient?')) {
+    if (confirm('Are you sure you want to delete this patient?')) {
         try {
             await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
             fetchPatients();
