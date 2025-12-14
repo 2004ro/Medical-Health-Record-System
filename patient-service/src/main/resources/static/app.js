@@ -6,7 +6,9 @@ let allPatients = [];
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     fetchPatients();
+    fetchAppointments();
 });
+
 
 // Navigation
 function showSection(sectionId) {
@@ -48,9 +50,9 @@ async function fetchPatients() {
     }
 }
 
-// Render Functions
+// Update Dashboard Stats
 function updateDashboardStats(patients) {
-    document.getElementById('totalPatientsCount').innerText = patients.length;
+    if (patients) document.getElementById('totalPatientsCount').innerText = patients.length;
 }
 
 function renderRecentPatients(patients) {
@@ -99,8 +101,11 @@ function renderAllPatients(patients) {
             <td>${patient.email}</td>
             <td><span style="font-weight: 600; color: #ef4444">${patient.bloodGroup}</span></td>
             <td>
-                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
-                <button class="action-btn"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" title="View Details"><i class="fa-solid fa-eye"></i></button>
+                <button class="action-btn" title="Edit Patient"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" title="Delete Patient" onclick="deletePatient(${patient.patientId})" style="color: #ef4444; border-color: #fee2e2; background: #fef2f2;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -168,3 +173,129 @@ async function deletePatient(id) {
         }
     }
 }
+
+
+const APPT_API_URL = 'http://localhost:8082/api/v1/appointments';
+const PATIENT_API_URL = 'http://localhost:8082/api/v1/patients';
+
+// Fetch Appointments
+async function fetchAppointments() {
+    try {
+        const response = await fetch(APPT_API_URL);
+        const appointments = await response.json();
+        allAppointments = appointments; // Store appointments in state
+        renderAppointments(appointments);
+        updateDashboardStats(allPatients, allAppointments); // Update with both patients and appointments
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+    }
+}
+
+// Render Appointments
+function renderAppointments(appointments) {
+    const tbody = document.getElementById('appointmentsTableBody');
+    tbody.innerHTML = '';
+
+    appointments.forEach(appt => {
+        const datetime = new Date(appt.appointmentTime).toLocaleString();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${appt.id}</td>
+            <td>${appt.patientName}</td>
+            <td>${appt.doctorName}</td>
+            <td>${datetime}</td>
+            <td>${appt.reason}</td>
+            <td><span class="status-badge" style="background: #e0f2fe; color: #0284c7;">${appt.status}</span></td>
+            <td>
+                <button class="action-btn" onclick="deleteAppointment(${appt.id})" style="color: #ef4444;"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Add Appointment Modal Logic
+function openAppointmentModal() {
+    document.getElementById('addAppointmentModal').classList.add('active');
+}
+function closeAppointmentModal() {
+    document.getElementById('addAppointmentModal').classList.remove('active');
+}
+
+// Fetch Patient Name for Modal
+async function fetchPatientName() {
+    const id = document.getElementById('appPatientId').value;
+    const nameField = document.getElementById('appPatientName');
+
+    if (!id) return;
+
+    try {
+        const response = await fetch(`${PATIENT_API_URL}/${id}`);
+        if (response.ok) {
+            const patient = await response.json();
+            nameField.value = `${patient.firstName} ${patient.lastName}`;
+        } else {
+            nameField.value = "Patient Not Found";
+        }
+    } catch (e) {
+        nameField.value = "Error fetching patient";
+    }
+}
+
+// Handle Add Appointment Submit
+document.getElementById('addAppointmentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    // Add default status
+    data.status = "SCHEDULED";
+
+    try {
+        const response = await fetch(APPT_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert('Appointment Booked!');
+            closeAppointmentModal();
+            fetchAppointments();
+            e.target.reset();
+        } else {
+            alert('Failed to book appointment');
+        }
+    } catch (error) {
+        alert('Error booking appointment');
+    }
+});
+
+// Delete Appointment
+async function deleteAppointment(id) {
+    if (confirm('Cancel this appointment?')) {
+        await fetch(`${APPT_API_URL}/${id}`, { method: 'DELETE' });
+        fetchAppointments();
+    }
+}
+
+// Global Search
+document.getElementById('globalSearch').addEventListener('keyup', (e) => {
+    const query = e.target.value.toLowerCase();
+
+    // Switch to patients tab if not active
+    if (!document.getElementById('patients').classList.contains('active')) {
+        showSection('patients');
+        // Update nav active state
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelectorAll('.nav-item')[1].classList.add('active'); // 2nd item is Patients
+    }
+
+    const filtered = allPatients.filter(p =>
+        p.firstName.toLowerCase().includes(query) ||
+        p.lastName.toLowerCase().includes(query) ||
+        p.email.toLowerCase().includes(query) ||
+        p.patientUniqueId.toLowerCase().includes(query)
+    );
+    renderAllPatients(filtered);
+});

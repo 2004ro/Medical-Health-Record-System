@@ -42,7 +42,7 @@ services:
     networks:
       - mhrs-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/patient-service/api/v1/patients/health/check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/api/v1/patients/health/check"]
       interval: 30s
       timeout: 3s
       retries: 5

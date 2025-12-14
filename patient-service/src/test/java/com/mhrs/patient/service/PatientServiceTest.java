@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,8 +67,8 @@ class PatientServiceTest {
         patient.setAllergies("None");
         patient.setMedicalHistory("No major illnesses");
         patient.setActive(true);
-        patient.setCreatedAt(LocalDate.now());
-        patient.setUpdatedAt(LocalDate.now());
+        patient.setCreatedAt(LocalDateTime.now());
+        patient.setUpdatedAt(LocalDateTime.now());
     }
 
     @Test

@@ -58,22 +58,15 @@ CREATE TABLE IF NOT EXISTS doctors (
 
 -- Create Appointments Table
 CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    appointment_unique_id VARCHAR(50) UNIQUE NOT NULL,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     patient_id BIGINT NOT NULL,
-    doctor_id BIGINT NOT NULL,
-    appointment_date DATE NOT NULL,
-    appointment_time TIME NOT NULL,
+    patient_name VARCHAR(255) NOT NULL,
+    appointment_time DATETIME NOT NULL,
+    doctor_name VARCHAR(255) NOT NULL,
     reason VARCHAR(255),
     status VARCHAR(50) DEFAULT 'SCHEDULED',
-    notes LONGTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id),
-    INDEX idx_patient_id (patient_id),
-    INDEX idx_doctor_id (doctor_id),
-    INDEX idx_appointment_date (appointment_date)
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
 );
 
 -- Create Medical Records Table

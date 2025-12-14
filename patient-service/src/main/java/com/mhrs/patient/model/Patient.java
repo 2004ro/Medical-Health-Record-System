@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patients")
@@ -15,11 +16,10 @@ public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long patientId;
 
     @Column(nullable = false, unique = true)
-    private String patientUniqueId;  // Unique Patient ID (e.g., PAT-001)
+    private String patientUniqueId; // Unique Patient ID (e.g., PAT-001)
 
     @Column(nullable = false)
     private String firstName;
@@ -37,7 +37,7 @@ public class Patient {
     private LocalDate dateOfBirth;
 
     @Column(nullable = false)
-    private String gender;  // Male, Female, Other
+    private String gender; // Male, Female, Other
 
     @Column(nullable = false)
     private String address;
@@ -64,19 +64,19 @@ public class Patient {
     private boolean active = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDate.now();
-        updatedAt = LocalDate.now();
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDate.now();
+        updatedAt = LocalDateTime.now();
     }
 }

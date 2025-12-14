@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MHRS | Medical Health Record System</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar -->
@@ -19,7 +22,7 @@
                 <i class="fa-solid fa-heart-pulse"></i>
                 <span>MedCare</span>
             </div>
-            
+
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showSection('dashboard')">
                     <i class="fa-solid fa-chart-pie"></i>
@@ -57,7 +60,8 @@
                 </div>
                 <div class="top-actions">
                     <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">3</span></button>
-                    <button class="add-patient-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Patient</button>
+                    <button class="add-patient-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add
+                        Patient</button>
                 </div>
             </header>
 
@@ -119,35 +123,79 @@
                 </div>
             </section>
 
-            <!-- Section: Patients -->
-            <section id="patients" class="content-section">
+            <!-- Section: Appointments -->
+            <section id="appointments" class="content-section">
                 <div class="section-header">
-                    <h2>Patient Directory</h2>
-                    <div class="filters">
-                        <input type="text" id="patientSearchInput" placeholder="Filter by name..." onkeyup="searchPatients()">
-                    </div>
+                    <h2>Appointments</h2>
+                    <button class="add-patient-btn" onclick="openAppointmentModal()"><i class="fa-solid fa-plus"></i>
+                        Book Appointment</button>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Unique ID</th>
-                                <th>Name</th>
-                                <th>Age/DOB</th>
-                                <th>Gender</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Blood Group</th>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Doctor</th>
+                                <th>Date/Time</th>
+                                <th>Reason</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="allPatientsTableBody">
+                        <tbody id="appointmentsTableBody">
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Add Appointment Modal -->
+    <div class="modal" id="addAppointmentModal">
+        <div class="modal-content" style="max-width: 500px">
+            <div class="modal-header">
+                <h2>Book Appointment</h2>
+                <button class="close-btn" onclick="closeAppointmentModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAppointmentForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label>Patient ID</label>
+                            <input type="number" name="patientId" id="appPatientId" required
+                                onchange="fetchPatientName()">
+                        </div>
+                        <div class="form-group">
+                            <label>Patient Name</label>
+                            <input type="text" name="patientName" id="appPatientName" readonly required
+                                style="background: #f1f5f9;">
+                        </div>
+                        <div class="form-group">
+                            <label>Doctor Name</label>
+                            <select name="doctorName" required>
+                                <option value="Dr. Smith (Cardiology)">Dr. Smith (Cardiology)</option>
+                                <option value="Dr. Sarah (Neurology)">Dr. Sarah (Neurology)</option>
+                                <option value="Dr. Mike (General)">Dr. Mike (General)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date & Time</label>
+                            <input type="datetime-local" name="appointmentTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Reason</label>
+                            <input type="text" name="reason" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeAppointmentModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Book Now</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Add Patient Modal -->
@@ -237,6 +285,98 @@
         </div>
     </div>
 
+    <!-- Edit Patient Modal -->
+    <div class="modal" id="editPatientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Patient</h2>
+                <button class="close-btn" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPatientForm">
+                    <input type="hidden" name="patientId" id="editPatientId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" name="firstName" id="editFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" name="lastName" id="editLastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" id="editEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" name="phoneNumber" id="editPhoneNumber" pattern="\d{10}"
+                                title="10 digit number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="dateOfBirth" id="editDateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select name="gender" id="editGender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group</label>
+                            <select name="bloodGroup" id="editBloodGroup" required>
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Zip Code</label>
+                            <input type="text" name="zipCode" id="editZipCode" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Address</label>
+                            <input type="text" name="address" id="editAddress" required>
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" name="city" id="editCity" required>
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <input type="text" name="state" id="editState" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Allergies</label>
+                            <input type="text" name="allergies" id="editAllergies"
+                                placeholder="e.g. Peanuts, Penicillin">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Medical History</label>
+                            <textarea name="medicalHistory" id="editMedicalHistory" rows="3"
+                                placeholder="Previous conditions..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Update Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
+
 </html>
