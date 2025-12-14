@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8082/api/v1/patients';
+const API_BASE_URL = '/api/v1/patients';
 
 // State
 let allPatients = [];
@@ -175,8 +175,8 @@ async function deletePatient(id) {
 }
 
 
-const APPT_API_URL = 'http://localhost:8082/api/v1/appointments';
-const PATIENT_API_URL = 'http://localhost:8082/api/v1/patients';
+const APPT_API_URL = '/api/v1/appointments';
+const PATIENT_API_URL = '/api/v1/patients';
 
 // Fetch Appointments
 async function fetchAppointments() {

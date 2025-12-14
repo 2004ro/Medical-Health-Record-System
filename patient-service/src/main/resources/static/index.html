@@ -123,6 +123,34 @@
                 </div>
             </section>
 
+            <!-- Section: Patients -->
+            <section id="patients" class="content-section">
+                <div class="section-header">
+                    <h2>Patients</h2>
+                    <button class="add-patient-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add
+                        Patient</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unique ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Blood Group</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allPatientsTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- Section: Appointments -->
             <section id="appointments" class="content-section">
                 <div class="section-header">
@@ -147,6 +175,19 @@
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- Section: Settings -->
+            <section id="settings" class="content-section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h3>Application Settings</h3>
+                        <p>Settings functionality coming soon...</p>
+                    </div>
                 </div>
             </section>
         </main>
