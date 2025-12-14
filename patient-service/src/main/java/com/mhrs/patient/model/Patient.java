@@ -60,7 +60,7 @@ public class Patient {
     private String medicalHistory;
 
     @Column(nullable = false)
-    private Boolean active = true;
+    private boolean active = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;

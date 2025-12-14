@@ -1,11 +1,10 @@
-package com.mhrs.patient;
+package com.mhrs.patient.service;
 
 import com.mhrs.patient.dto.CreatePatientRequest;
 import com.mhrs.patient.dto.PatientResponse;
 import com.mhrs.patient.exception.PatientNotFoundException;
 import com.mhrs.patient.model.Patient;
 import com.mhrs.patient.repository.PatientRepository;
-import com.mhrs.patient.service.PatientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -73,16 +72,17 @@ class PatientServiceTest {
 
     @Test
     @DisplayName("Should create patient successfully")
+    @SuppressWarnings("null")
     void testCreatePatient() {
         when(patientRepository.findByEmail(createPatientRequest.getEmail())).thenReturn(Optional.empty());
-        when(patientRepository.save(any(Patient.class))).thenReturn(patient);
+        when(patientRepository.save(any())).thenReturn(patient);
 
         PatientResponse response = patientService.createPatient(createPatientRequest);
 
         assertNotNull(response);
         assertEquals("John", response.getFirstName());
         assertEquals("john.doe@example.com", response.getEmail());
-        verify(patientRepository, times(1)).save(any(Patient.class));
+        verify(patientRepository, times(1)).save(any());
     }
 
     @Test
@@ -105,4 +105,3 @@ class PatientServiceTest {
         assertThrows(PatientNotFoundException.class, () -> patientService.getPatientById(999L));
     }
 }
-```

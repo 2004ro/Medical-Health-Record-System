@@ -6,15 +6,17 @@ import com.mhrs.patient.exception.PatientAlreadyExistsException;
 import com.mhrs.patient.exception.PatientNotFoundException;
 import com.mhrs.patient.model.Patient;
 import com.mhrs.patient.repository.PatientRepository;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 public class PatientService {
+
+    private static final Logger log = LoggerFactory.getLogger(PatientService.class);
 
     @Autowired
     private PatientRepository patientRepository;
@@ -156,7 +158,7 @@ public class PatientService {
                 patient.getBloodGroup(),
                 patient.getAllergies(),
                 patient.getMedicalHistory(),
-                patient.getActive(),
+                patient.isActive(),
                 patient.getCreatedAt(),
                 patient.getUpdatedAt()
         );

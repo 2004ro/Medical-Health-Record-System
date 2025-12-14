@@ -24,7 +24,7 @@ public class PatientResponse {
     private String bloodGroup;
     private String allergies;
     private String medicalHistory;
-    private Boolean active;
+    private boolean active;
     private LocalDate createdAt;
     private LocalDate updatedAt;
 }

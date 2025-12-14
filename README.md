@@ -1,25 +1,32 @@
-# Medical Health Record System
+```markdown
+# Medical Health Record Management System
 
-A microservice-based sample project containing:
-- auth-service
-- patient-service
-- doctor-service
-- appointment-service
-- medical-record-service
+## Overview
+A microservices-based healthcare platform for managing patient records, appointments, and medical history.
 
-Quick start
-1. Ensure the service directories exist:
-   mkdir -p auth-service patient-service doctor-service appointment-service medical-record-service
-2. Implement each service (API, data store, and Dockerfile as needed).
-3. Run services individually or orchestrate with Docker Compose / Kubernetes.
+## Microservices
+1. Auth Service (8081) - Authentication & Authorization
+2. Patient Service (8082) - Patient Management
+3. Doctor Service (8083) - Doctor Profiles & Management
+4. Appointment Service (8084) - Appointment Scheduling
+5. Medical Record Service (8085) - Medical Records Storage
 
-Project structure
-- auth-service/ — authentication and authorization
-- patient-service/ — patient management
-- doctor-service/ — doctor profiles and schedules
-- appointment-service/ — booking and appointments
-- medical-record-service/ — patient medical records
+## Technology Stack
+- Java 11+
+- Spring Boot
+- Maven
+- MySQL
+- Docker
+- Jenkins
 
-Notes
-- Add README and implementation details inside each service folder.
-- Secure sensitive data and follow healthcare compliance when storing records.
+## DevOps Tools
+- Git (Version Control)
+- Maven (Build Tool)
+- Docker (Containerization)
+- Jenkins (CI/CD)
+
+## Setup Instructions
+See individual microservice README files
+```
+
+---
