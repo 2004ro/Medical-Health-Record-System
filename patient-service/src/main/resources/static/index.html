@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MHRS | Medical Health Record System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>MedCare</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('patients')">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Patients</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('appointments')">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('settings')">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar">DA</div>
+                <div class="user-info">
+                    <h4>Dr. Admin</h4>
+                    <small>Chief Physician</small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="globalSearch" placeholder="Search patients, records...">
+                </div>
+                <div class="top-actions">
+                    <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">3</span></button>
+                    <button class="add-patient-btn" onclick="openModal()"><i class="fa-solid fa-plus"></i> Add Patient</button>
+                </div>
+            </header>
+
+            <!-- Section: Dashboard -->
+            <section id="dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon-box blue"><i class="fa-solid fa-user-doctor"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Patients</h3>
+                            <p id="totalPatientsCount">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon-box green"><i class="fa-solid fa-calendar-day"></i></div>
+                        <div class="stat-info">
+                            <h3>Today's Visits</h3>
+                            <p>12</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon-box orange"><i class="fa-solid fa-flask"></i></div>
+                        <div class="stat-info">
+                            <h3>Lab Results</h3>
+                            <p>5 Pending</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon-box purple"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                        <div class="stat-info">
+                            <h3>Revenue</h3>
+                            <p>$4,250</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-patients">
+                    <div class="section-header">
+                        <h2>Recent Patients</h2>
+                        <a href="#" class="view-all" onclick="showSection('patients')">View All</a>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentPatientsTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Patients -->
+            <section id="patients" class="content-section">
+                <div class="section-header">
+                    <h2>Patient Directory</h2>
+                    <div class="filters">
+                        <input type="text" id="patientSearchInput" placeholder="Filter by name..." onkeyup="searchPatients()">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Unique ID</th>
+                                <th>Name</th>
+                                <th>Age/DOB</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Blood Group</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allPatientsTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Patient Modal -->
+    <div class="modal" id="addPatientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Patient</h2>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPatientForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" name="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" name="phoneNumber" pattern="\d{10}" title="10 digit number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="dateOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select name="gender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group</label>
+                            <select name="bloodGroup" required>
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Zip Code</label>
+                            <input type="text" name="zipCode" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Address</label>
+                            <input type="text" name="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <input type="text" name="state" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Allergies</label>
+                            <input type="text" name="allergies" placeholder="e.g. Peanuts, Penicillin">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Medical History</label>
+                            <textarea name="medicalHistory" rows="3" placeholder="Previous conditions..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Patient</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phoneNumber": "9876543210",
+    "dateOfBirth": "1990-05-15",
+    "gender": "Male",
+    "address": "123 Main St",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "zipCode": "560001",
+    "bloodGroup": "O+",
+    "allergies": "None",
+    "medicalHistory": "No major illnesses"
+}
