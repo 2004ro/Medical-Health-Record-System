@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql-db:
+    image: mysql:8.0
+    container_name: mhrs-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: medical_health_record
+      MYSQL_USER: mhrs_user
+      MYSQL_PASSWORD: mhrs_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mhrs-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 3s
+      retries: 5
+
+  # Patient Service
+  patient-service:
+    build:
+      context: ./patient-service
+      dockerfile: Dockerfile
+    container_name: mhrs-patient-service
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/medical_health_record
+      SPRING_DATASOURCE_USERNAME: mhrs_user
+      SPRING_DATASOURCE_PASSWORD: mhrs_password
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - mhrs-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/api/v1/patients/health/check"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  mhrs-network:
+    driver: bridge

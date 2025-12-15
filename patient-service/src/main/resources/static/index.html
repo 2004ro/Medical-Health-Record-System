@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Health Record System</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --success-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #d1fae5;
+            color: #065f46;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .api-info {
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        #apiResponse {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v 8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1z"/><path d="M6 5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 2v2"/><path d="M12 20v2"/></svg>
+            MedRecord System
+        </div>
+        <div>
+            <span style="color: var(--text-secondary);">v1.0.0</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Patient Service</h1>
+            <p>Secure, reliable, and fast patient data management service.</p>
+            
+            <div class="status-card">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    System Operational
+                </div>
+                <p>The patient microservice is currently running and accepting requests.</p>
+                <button class="btn" onclick="checkHealth()">Check Health Status</button>
+                <div id="apiResponse"></div>
+            </div>
+        </div>
+
+        <div class="api-info">
+            <div class="info-card">
+                <h3>Documentation</h3>
+                <p>Access the full API documentation to integrate with the patient service endpoints.</p>
+            </div>
+            <div class="info-card">
+                <h3>Monitor</h3>
+                <p>Real-time monitoring of service metrics, latency, and throughput.</p>
+            </div>
+            <div class="info-card">
+                <h3>Security</h3>
+                <p>Enterprise-grade security with role-based access control and data encryption.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkHealth() {
+            const responseDiv = document.getElementById('apiResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch('/api/v1/patients/health/check');
+                if (response.ok) {
+                    const text = await response.text();
+                    responseDiv.textContent = '✓ ' + text;
+                    responseDiv.style.color = 'green';
+                } else {
+                    responseDiv.textContent = '❌ Error checking health';
+                    responseDiv.style.color = 'red';
+                }
+            } catch (error) {
+                responseDiv.textContent = '❌ Connection failed';
+                responseDiv.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>
