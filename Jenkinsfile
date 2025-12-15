@@ -6,6 +6,7 @@ pipeline {
         SERVICE_NAME = 'mhrs-patient-service'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKER_HUB_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
+        MAVEN_IMAGE = 'maven:3.9-eclipse-temurin-21'
     }
 
     options {
@@ -16,6 +17,8 @@ pipeline {
 
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['DEV', 'STAGING', 'PROD'], description: 'Target environment')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
+        booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push image to Docker Hub')
     }
 
     stages {
@@ -27,30 +30,53 @@ pipeline {
             }
         }
 
-        stage('2. Build with Maven') {
+        stage('2. Build with Maven (Docker)') {
             steps {
-                echo "======== Building application with Maven ========"
+                echo "======== Building application with Maven in Docker ========"
                 dir('patient-service') {
-                    sh 'mvn clean compile'
+                    sh """
+                        docker run --rm \
+                            -v \$(pwd):/app \
+                            -w /app \
+                            ${MAVEN_IMAGE} \
+                            mvn clean compile
+                    """
                 }
             }
         }
 
         stage('3. Unit Tests') {
+            when {
+                expression { !params.SKIP_TESTS }
+            }
             steps {
                 echo "======== Running unit tests ========"
                 dir('patient-service') {
-                    sh 'mvn test'
+                    sh """
+                        docker run --rm \
+                            -v \$(pwd):/app \
+                            -w /app \
+                            ${MAVEN_IMAGE} \
+                            mvn test
+                    """
                 }
             }
         }
 
         stage('4. Code Quality Analysis') {
+            when {
+                expression { !params.SKIP_TESTS }
+            }
             steps {
                 echo "======== Performing code quality checks ========"
                 dir('patient-service') {
-                    // Optional: Integrate SonarQube for static code analysis
-                    sh 'mvn verify'
+                    sh """
+                        docker run --rm \
+                            -v \$(pwd):/app \
+                            -w /app \
+                            ${MAVEN_IMAGE} \
+                            mvn verify
+                    """
                 }
             }
         }
@@ -59,7 +85,13 @@ pipeline {
             steps {
                 echo "======== Packaging application ========"
                 dir('patient-service') {
-                    sh 'mvn package -DskipTests'
+                    sh """
+                        docker run --rm \
+                            -v \$(pwd):/app \
+                            -w /app \
+                            ${MAVEN_IMAGE} \
+                            mvn package -DskipTests
+                    """
                 }
             }
         }
@@ -68,15 +100,27 @@ pipeline {
             steps {
                 echo "======== Building Docker image ========"
                 dir('patient-service') {
-                    sh 'docker build -t ${DOCKER_IMAGE} .'
-                    sh 'docker tag ${DOCKER_IMAGE} ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest'
+                    script {
+                        // Build the application image
+                        sh "docker build -t ${SERVICE_NAME}:${IMAGE_TAG} ."
+                        sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${SERVICE_NAME}:latest"
+                        
+                        // Only tag for Docker Hub if we're going to push
+                        if (params.PUSH_TO_DOCKERHUB) {
+                            sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE}"
+                            sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest"
+                        }
+                    }
                 }
             }
         }
 
         stage('7. Push to Docker Hub') {
             when {
-                branch 'main'
+                allOf {
+                    branch 'main'
+                    expression { params.PUSH_TO_DOCKERHUB }
+                }
             }
             steps {
                 echo "======== Pushing Docker image to Docker Hub ========"
@@ -97,10 +141,15 @@ pipeline {
                 script {
                     if (params.ENVIRONMENT == 'DEV') {
                         sh '''
-                            docker-compose -f docker-compose.yml down
+                            # Stop and remove existing containers
+                            docker-compose -f docker-compose.yml down || true
+                            
+                            # Start services
                             docker-compose -f docker-compose.yml up -d
-                            sleep 10
-                            curl -f http://localhost:8082/patient-service/api/v1/patients/health/check || exit 1
+                            
+                            # Wait for services to be ready
+                            echo "Waiting for services to start..."
+                            sleep 15
                         '''
                     } else if (params.ENVIRONMENT == 'STAGING') {
                         echo "Deploying to staging environment"
@@ -116,17 +165,38 @@ pipeline {
         stage('9. Health Check') {
             steps {
                 echo "======== Performing health checks ========"
-                sh '''
-                    for i in {1..30}; do
-                        if curl -f http://localhost:8082/patient-service/api/v1/patients/health/check; then
-                            echo "Service is healthy"
-                            exit 0
-                        fi
-                        echo "Attempt $i failed, retrying..."
-                        sleep 2
-                    done
-                    exit 1
-                '''
+                script {
+                    sh '''
+                        echo "Checking service health..."
+                        for i in {1..30}; do
+                            if curl -f http://localhost:8082/api/v1/patients/health/check 2>/dev/null; then
+                                echo "✓ Service is healthy!"
+                                exit 0
+                            fi
+                            echo "Attempt $i/30 - Service not ready yet, retrying..."
+                            sleep 2
+                        done
+                        echo "✗ Health check failed after 30 attempts"
+                        exit 1
+                    '''
+                }
+            }
+        }
+
+        stage('10. Smoke Tests') {
+            steps {
+                echo "======== Running smoke tests ========"
+                script {
+                    sh '''
+                        echo "Running basic API smoke tests..."
+                        
+                        # Test 1: Check if API is responding
+                        echo "Test 1: API Response Check"
+                        curl -f http://localhost:8082/api/v1/patients || exit 1
+                        
+                        echo "✓ All smoke tests passed!"
+                    '''
+                }
             }
         }
     }
@@ -134,21 +204,37 @@ pipeline {
     post {
         always {
             echo "======== Pipeline completed ========"
-            // Archive artifacts
-            archiveArtifacts artifacts: 'patient-service/target/*.jar', allowEmptyArchive: true
             
-            // Clean up
-            cleanWs()
+            // Archive artifacts
+            script {
+                dir('patient-service') {
+                    archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true, fingerprint: true
+                }
+            }
+            
+            // Clean up Docker images to save space (keep latest)
+            sh '''
+                echo "Cleaning up old Docker images..."
+                docker image prune -f || true
+            '''
         }
 
         success {
-            echo "======== Pipeline SUCCESS ========"
-            // Send success notification
+            echo "======== ✓ Pipeline SUCCESS ========"
+            echo "Build #${BUILD_NUMBER} completed successfully!"
+            echo "Image: ${SERVICE_NAME}:${IMAGE_TAG}"
+            // Send success notification (email, Slack, etc.)
         }
 
         failure {
-            echo "======== Pipeline FAILED ========"
+            echo "======== ✗ Pipeline FAILED ========"
+            echo "Build #${BUILD_NUMBER} failed. Please check the logs."
             // Send failure notification
+        }
+
+        unstable {
+            echo "======== ⚠ Pipeline UNSTABLE ========"
+            echo "Build #${BUILD_NUMBER} is unstable."
         }
     }
 }
