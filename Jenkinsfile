@@ -31,16 +31,15 @@ pipeline {
         }
 
         stage('2. Build with Maven (Docker)') {
+            agent {
+                docker {
+                    image "${MAVEN_IMAGE}"
+                }
+            }
             steps {
                 echo "======== Building application with Maven in Docker ========"
                 dir('patient-service') {
-                    sh """
-                        docker run --rm \
-                            -v \$(pwd):/app \
-                            -w /app \
-                            ${MAVEN_IMAGE} \
-                            mvn clean compile
-                    """
+                    sh 'mvn clean compile'
                 }
             }
         }
@@ -49,16 +48,15 @@ pipeline {
             when {
                 expression { !params.SKIP_TESTS }
             }
+            agent {
+                docker {
+                    image "${MAVEN_IMAGE}"
+                }
+            }
             steps {
                 echo "======== Running unit tests ========"
                 dir('patient-service') {
-                    sh """
-                        docker run --rm \
-                            -v \$(pwd):/app \
-                            -w /app \
-                            ${MAVEN_IMAGE} \
-                            mvn test
-                    """
+                    sh 'mvn test'
                 }
             }
         }
@@ -67,31 +65,29 @@ pipeline {
             when {
                 expression { !params.SKIP_TESTS }
             }
+            agent {
+                docker {
+                    image "${MAVEN_IMAGE}"
+                }
+            }
             steps {
                 echo "======== Performing code quality checks ========"
                 dir('patient-service') {
-                    sh """
-                        docker run --rm \
-                            -v \$(pwd):/app \
-                            -w /app \
-                            ${MAVEN_IMAGE} \
-                            mvn verify
-                    """
+                    sh 'mvn verify'
                 }
             }
         }
 
         stage('5. Package Application') {
+            agent {
+                docker {
+                    image "${MAVEN_IMAGE}"
+                }
+            }
             steps {
                 echo "======== Packaging application ========"
                 dir('patient-service') {
-                    sh """
-                        docker run --rm \
-                            -v \$(pwd):/app \
-                            -w /app \
-                            ${MAVEN_IMAGE} \
-                            mvn package -DskipTests
-                    """
+                    sh 'mvn package -DskipTests'
                 }
             }
         }
