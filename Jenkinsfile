@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven 3'
-        jdk 'jdk21'
-    }
-
     environment {
         DOCKER_HUB_REPO = 'your-dockerhub-username'
         SERVICE_NAME = 'mhrs-patient-service'
