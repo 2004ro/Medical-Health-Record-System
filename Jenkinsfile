@@ -6,7 +6,6 @@ pipeline {
         SERVICE_NAME = 'mhrs-patient-service'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKER_HUB_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
-        MAVEN_IMAGE = 'maven:3.9-eclipse-temurin-21'
     }
 
     options {
@@ -21,6 +20,10 @@ pipeline {
         booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push image to Docker Hub')
     }
 
+    tools {
+        maven 'Maven3'
+    }
+
     stages {
         stage('1. Checkout') {
             steps {
@@ -30,14 +33,9 @@ pipeline {
             }
         }
 
-        stage('2. Build with Maven (Docker)') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                }
-            }
+        stage('2. Build with Maven') {
             steps {
-                echo "======== Building application with Maven in Docker ========"
+                echo "======== Building application with Maven ========"
                 dir('patient-service') {
                     sh 'mvn clean compile'
                 }
@@ -47,11 +45,6 @@ pipeline {
         stage('3. Unit Tests') {
             when {
                 expression { !params.SKIP_TESTS }
-            }
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                }
             }
             steps {
                 echo "======== Running unit tests ========"
@@ -65,11 +58,6 @@ pipeline {
             when {
                 expression { !params.SKIP_TESTS }
             }
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                }
-            }
             steps {
                 echo "======== Performing code quality checks ========"
                 dir('patient-service') {
@@ -79,11 +67,6 @@ pipeline {
         }
 
         stage('5. Package Application') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                }
-            }
             steps {
                 echo "======== Packaging application ========"
                 dir('patient-service') {
