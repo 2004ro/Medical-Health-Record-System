@@ -4,46 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Health Record System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/site">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2563eb;
+            --primary-color: #3b82f6; /* More vibrant blue */
+            --primary-dark: #2563eb;
             --secondary-color: #1e40af;
-            --background-color: #f3f4f6;
+            --background-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
             --success-color: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
             background-color: var(--background-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
             color: var(--text-primary);
             min-height: 100vh;
+            line-height: 1.6;
         }
 
         .navbar {
-            background-color: var(--card-bg);
-            padding: 1rem 2rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1.25rem 2rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .logo {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
+            font-weight: 800;
+            color: var(--primary-dark);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            letter-spacing: -0.025em;
         }
 
         .container {
@@ -58,28 +74,38 @@
         }
 
         .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, var(--primary-color), var(--success-color));
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--success-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.05em;
         }
 
         .hero p {
             color: var(--text-secondary);
             font-size: 1.25rem;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .status-card {
-            background: var(--card-bg);
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            max-width: 480px;
             margin: 0 auto;
             text-align: center;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
         }
 
         .status-card:hover {
@@ -113,35 +139,47 @@
         }
 
         .btn {
-            display: inline-block;
-            background-color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
             text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.2s;
+            font-weight: 600;
+            transition: all 0.2s;
             border: none;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            font-size: 1rem;
         }
 
         .btn:hover {
-            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
         }
 
         .api-info {
-            margin-top: 3rem;
+            margin-top: 5rem;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         .info-card {
             background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .info-card h3 {
