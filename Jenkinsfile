@@ -80,15 +80,8 @@ pipeline {
                 echo "======== Building Docker image ========"
                 dir('patient-service') {
                     script {
-                        // Build the application image
-                        sh "docker build -t ${SERVICE_NAME}:${IMAGE_TAG} ."
-                        sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${SERVICE_NAME}:latest"
-                        
-                        // Only tag for Docker Hub if we're going to push
-                        if (params.PUSH_TO_DOCKERHUB) {
-                            sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_IMAGE}"
-                            sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest"
-                        }
+                      def app = docker.build("${SERVICE_NAME}:${IMAGE_TAG}", ".")
+                      app.tag('latest')
                     }
                 }
             }
@@ -103,13 +96,11 @@ pipeline {
             }
             steps {
                 echo "======== Pushing Docker image to Docker Hub ========"
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-                        docker push ${DOCKER_IMAGE}
-                        docker push ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest
-                        docker logout
-                    '''
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        docker.image("${SERVICE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${SERVICE_NAME}:latest").push()
+                    }
                 }
             }
         }
