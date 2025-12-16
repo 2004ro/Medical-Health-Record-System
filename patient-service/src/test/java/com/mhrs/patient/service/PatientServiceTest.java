@@ -73,7 +73,7 @@ class PatientServiceTest {
 
     @Test
     @DisplayName("Should create patient successfully")
-    @SuppressWarnings("null")
+
     void testCreatePatient() {
         when(patientRepository.findByEmail(createPatientRequest.getEmail())).thenReturn(Optional.empty());
         when(patientRepository.save(any())).thenReturn(patient);

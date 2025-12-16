@@ -31,3 +31,8 @@ logs/
 # Environment
 .env
 .env.local
+
+# Media
+*.mp4
+*.mov
+*.avi
