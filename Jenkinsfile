@@ -114,7 +114,7 @@ pipeline {
             }
         }
 
-        stage('8. Deploy to ${ENVIRONMENT}') {
+        stage('8. Deploy to DEV') {
             steps {
                 echo "======== Deploying to ${ENVIRONMENT} environment ========"
                 script {
