@@ -101,11 +101,11 @@ function renderAllPatients(patients) {
             <td>${patient.email}</td>
             <td><span style="font-weight: 600; color: #ef4444">${patient.bloodGroup}</span></td>
             <td>
-                <button class="action-btn" title="View Details"><i class="fa-solid fa-eye"></i></button>
-                <button class="action-btn" title="Edit Patient"><i class="fa-solid fa-pen"></i></button>
+                <button class="action-btn" title="View Details" onclick="viewPatientDetails(${patient.patientId})"><i class="fa-solid fa-eye"></i></button>
+                <button class="action-btn" title="Edit Patient" onclick="openEditModal(${patient.patientId})"><i class="fa-solid fa-pen"></i></button>
                 <button class="action-btn" title="Delete Patient" onclick="deletePatient(${patient.patientId})" style="color: #ef4444; border-color: #fee2e2; background: #fef2f2;">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+        <i class="fa-solid fa-trash"></i>
+    </button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -222,25 +222,120 @@ function closeAppointmentModal() {
     document.getElementById('addAppointmentModal').classList.remove('active');
 }
 
-// Fetch Patient Name for Modal
-async function fetchPatientName() {
-    const id = document.getElementById('appPatientId').value;
-    const nameField = document.getElementById('appPatientName');
-
-    if (!id) return;
-
-    try {
-        const response = await fetch(`${PATIENT_API_URL}/${id}`);
-        if (response.ok) {
-            const patient = await response.json();
-            nameField.value = `${patient.firstName} ${patient.lastName}`;
-        } else {
-            nameField.value = "Patient Not Found";
-        }
-    } catch (e) {
-        nameField.value = "Error fetching patient";
+// Theme Switching
+function toggleTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        // Optional: Save preference to localStorage
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
     }
 }
+
+// Check for saved theme
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    // Ensure selector matches if it exists on load
+    // This part is tricky if the DOM isn't ready, but CSS handles the class.
+}
+
+// Fetch Patient Name by Unique ID
+async function fetchPatientName() {
+    const uniqueId = document.getElementById('appPatientId').value.trim();
+    const nameField = document.getElementById('appPatientName');
+
+    if (!uniqueId) {
+        nameField.value = '';
+        return;
+    }
+
+    // Since we have all patients loaded, we can filter client-side first for speed
+    // and falling back to backend if needed (though user likely just wants it to work now)
+    const patient = allPatients.find(p => p.patientUniqueId === uniqueId);
+
+    if (patient) {
+        nameField.value = `${patient.firstName} ${patient.lastName}`;
+    } else {
+        nameField.value = "Patient Not Found";
+    }
+}
+
+// Open Edit Modal
+function openEditModal(id) {
+    const patient = allPatients.find(p => p.patientId === id);
+    if (!patient) return;
+
+    document.getElementById('editPatientId').value = patient.patientId;
+    document.getElementById('editFirstName').value = patient.firstName;
+    document.getElementById('editLastName').value = patient.lastName;
+    document.getElementById('editEmail').value = patient.email;
+    document.getElementById('editPhoneNumber').value = patient.phoneNumber;
+    document.getElementById('editDateOfBirth').value = patient.dateOfBirth ? new Date(patient.dateOfBirth).toISOString().split('T')[0] : '';
+    document.getElementById('editGender').value = patient.gender;
+    document.getElementById('editBloodGroup').value = patient.bloodGroup;
+    document.getElementById('editZipCode').value = patient.zipCode || ''; // Handle potential nulls
+    document.getElementById('editAddress').value = patient.address || '';
+    document.getElementById('editCity').value = patient.city || '';
+    document.getElementById('editState').value = patient.state || '';
+    document.getElementById('editAllergies').value = patient.allergies || '';
+    document.getElementById('editMedicalHistory').value = patient.medicalHistory || '';
+
+    document.getElementById('editPatientModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editPatientModal').classList.remove('active');
+}
+
+// View Details (Reusing Edit Modal in Read-Only Mode for simplicity, or creating a separate one)
+function viewPatientDetails(id) {
+    const patient = allPatients.find(p => p.patientId === id);
+    if (!patient) return;
+
+    // Use specific view modal or alert for now as per simplicity
+    alert(`
+        Patient Details:
+        ID: ${patient.patientUniqueId}
+        Name: ${patient.firstName} ${patient.lastName}
+        Email: ${patient.email}
+        Phone: ${patient.phoneNumber}
+        DOB: ${new Date(patient.dateOfBirth).toLocaleDateString()}
+        Gender: ${patient.gender}
+        Blood Group: ${patient.bloodGroup}
+        Address: ${patient.address}, ${patient.city}, ${patient.state} ${patient.zipCode}
+        Allergies: ${patient.allergies || 'None'}
+        History: ${patient.medicalHistory || 'None'}
+    `);
+}
+
+// Handle Edit Submit
+document.getElementById('editPatientForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editPatientId').value;
+    const formData = new FormData(e.target);
+    const patientData = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patientData)
+        });
+
+        if (response.ok) {
+            alert('Patient updated successfully!');
+            closeEditModal();
+            fetchPatients();
+        } else {
+            alert('Failed to update patient');
+        }
+    } catch (error) {
+        alert('Error updating patient');
+    }
+});
+
 
 // Handle Add Appointment Submit
 document.getElementById('addAppointmentForm').addEventListener('submit', async (e) => {

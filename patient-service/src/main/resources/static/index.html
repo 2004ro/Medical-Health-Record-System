@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<<<<<<< HEAD
 
 <head>
     <meta charset="UTF-8">
@@ -44,26 +43,19 @@
             </nav>
 
             <div class="user-profile">
+                <!-- Changed text color style inline for visibility if needed, but handled in CSS -->
                 <div class="avatar">DA</div>
                 <div class="user-info">
-                    <h4>Dr. Admin</h4>
-                    <small>Chief Physician</small>
+                    <h4 style="color: #1e293b;">Dr. Admin</h4>
+                    <small style="color: #64748b;">Chief Physician</small>
                 </div>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="top-bar">
-                <div class="search-bar">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="globalSearch" placeholder="Search patients, records...">
-                </div>
-                <div class="top-actions">
-                    <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="badge">3</span></button>
-                </div>
-            </header>
-
+            <!-- Header Removed as per request -->
+            
             <!-- Section: Dashboard -->
             <section id="dashboard" class="content-section active">
                 <div class="stats-grid">
@@ -183,9 +175,38 @@
                     <h2>Settings</h2>
                 </div>
                 <div class="settings-container">
-                    <div class="settings-card">
-                        <h3>Application Settings</h3>
-                        <p>Settings functionality coming soon...</p>
+                     <!-- Added Settings Fields -->
+                    <div class="settings-card" style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom: 20px; color: var(--primary-dark);">Application Settings</h3>
+                        <form onsubmit="event.preventDefault(); alert('Settings Saved!');">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Hospital Name</label>
+                                    <input type="text" value="MedCare Hospital" >
+                                </div>
+                                <div class="form-group">
+                                    <label>Admin Email</label>
+                                    <input type="email" value="admin@medcare.com" >
+                                </div>
+                                <div class="form-group">
+                                    <label>Enable Notifications</label>
+                                    <select>
+                                        <option value="true">Yes</option>
+                                        <option value="false">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Theme</label>
+                                    <select onchange="toggleTheme(this.value)">
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full-width">
+                                    <button class="btn-submit" style="width: 200px;">Save Changes</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </section>
@@ -204,7 +225,8 @@
                     <div class="form-grid" style="grid-template-columns: 1fr;">
                         <div class="form-group">
                             <label>Patient ID</label>
-                            <input type="number" name="patientId" id="appPatientId" required
+                            <!-- Changed type to text -->
+                            <input type="text" name="patientId" id="appPatientId" required
                                 onchange="fetchPatientName()">
                         </div>
                         <div class="form-group">
@@ -234,255 +256,10 @@
                         <button type="submit" class="btn-submit">Book Now</button>
                     </div>
                 </form>
-=======
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Health Record System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com/site">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #3b82f6; /* More vibrant blue */
-            --primary-dark: #2563eb;
-            --secondary-color: #1e40af;
-            --background-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --success-color: #10b981;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--background-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            padding: 1.25rem 2rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            letter-spacing: -0.025em;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 4rem 0;
-        }
-
-        .hero h1 {
-            font-size: 4rem;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-dark), var(--success-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            letter-spacing: -0.05em;
-        }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.25rem;
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .status-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            border-radius: 1.5rem;
-            padding: 3rem;
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.06),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-            max-width: 480px;
-            margin: 0 auto;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .status-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: #d1fae5;
-            color: #065f46;
-            border-radius: 9999px;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--success-color);
-            border-radius: 50%;
-            margin-right: 0.5rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 1rem;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-        }
-
-        .api-info {
-            margin-top: 5rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .info-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .info-card h3 {
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .info-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        #apiResponse {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 0.5rem;
-            font-family: monospace;
-            text-align: left;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="logo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v 8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1z"/><path d="M6 5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"/><path d="M12 2v2"/><path d="M12 20v2"/></svg>
-            MedRecord System
-        </div>
-        <div>
-            <span style="color: var(--text-secondary);">v1.0.0</span>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="hero">
-            <h1>Patient Service</h1>
-            <p>Secure, reliable, and fast patient data management service.</p>
-            
-            <div class="status-card">
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    System Operational
-                </div>
-                <p>The patient microservice is currently running and accepting requests.</p>
-                <button class="btn" onclick="checkHealth()">Check Health Status</button>
-                <div id="apiResponse"></div>
-            </div>
-        </div>
-
-        <div class="api-info">
-            <div class="info-card">
-                <h3>Documentation</h3>
-                <p>Access the full API documentation to integrate with the patient service endpoints.</p>
-            </div>
-            <div class="info-card">
-                <h3>Monitor</h3>
-                <p>Real-time monitoring of service metrics, latency, and throughput.</p>
-            </div>
-            <div class="info-card">
-                <h3>Security</h3>
-                <p>Enterprise-grade security with role-based access control and data encryption.</p>
->>>>>>> feature/patient-management
             </div>
         </div>
     </div>
 
-<<<<<<< HEAD
     <!-- Add Patient Modal -->
     <div class="modal" id="addPatientModal">
         <div class="modal-content">
@@ -665,29 +442,3 @@
 </body>
 
 </html>
-=======
-    <script>
-        async function checkHealth() {
-            const responseDiv = document.getElementById('apiResponse');
-            responseDiv.style.display = 'block';
-            responseDiv.textContent = 'Checking...';
-            
-            try {
-                const response = await fetch('/api/v1/patients/health/check');
-                if (response.ok) {
-                    const text = await response.text();
-                    responseDiv.textContent = '✓ ' + text;
-                    responseDiv.style.color = 'green';
-                } else {
-                    responseDiv.textContent = '❌ Error checking health';
-                    responseDiv.style.color = 'red';
-                }
-            } catch (error) {
-                responseDiv.textContent = '❌ Connection failed';
-                responseDiv.style.color = 'red';
-            }
-        }
-    </script>
-</body>
-</html>
->>>>>>> feature/patient-management

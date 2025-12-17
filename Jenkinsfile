@@ -80,8 +80,9 @@ pipeline {
                 echo "======== Building Docker image ========"
                 dir('patient-service') {
                     script {
-                      def app = docker.build("${SERVICE_NAME}:${IMAGE_TAG}", ".")
-                      app.tag('latest')
+                        // Using shell commands instead of docker plugin for better compatibility
+                        sh "docker build -t ${SERVICE_NAME}:${IMAGE_TAG} ."
+                        sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${SERVICE_NAME}:latest"
                     }
                 }
             }
@@ -97,9 +98,17 @@ pipeline {
             steps {
                 echo "======== Pushing Docker image to Docker Hub ========"
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        docker.image("${SERVICE_NAME}:${IMAGE_TAG}").push()
-                        docker.image("${SERVICE_NAME}:latest").push()
+                    // Using shell commands for Docker Hub push
+                    // Note: This requires the 'dockerhub-credentials' to be configured in Jenkins
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        
+                        // Tag image with repo name explicitly
+                        sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
+                        sh "docker tag ${SERVICE_NAME}:${IMAGE_TAG} ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest"
+                        
+                        sh "docker push ${DOCKER_HUB_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${DOCKER_HUB_REPO}/${SERVICE_NAME}:latest"
                     }
                 }
             }
