@@ -116,8 +116,9 @@ pipeline {
 
         stage('8. Deploy to DEV') {
             steps {
-                echo "======== Deploying to ${ENVIRONMENT} environment ========"
+                echo "======== Deploying to ${ENVIRONMENT} environment (Docker Compose v2) ========"
                 script {
+                    sh 'docker compose version'
                     if (params.ENVIRONMENT == 'DEV') {
                         sh '''
                             # Stop and remove existing containers
