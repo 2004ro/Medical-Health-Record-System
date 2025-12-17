@@ -203,7 +203,7 @@ pipeline {
                         
                         # Test 1: Check if API is responding
                         echo "Test 1: API Response Check"
-                        curl -f http://localhost:8082/api/v1/patients || exit 1
+                        docker exec mhrs-patient-service curl -f http://localhost:8083/api/v1/patients || exit 1
                         
                         echo "✓ All smoke tests passed!"
                     '''
