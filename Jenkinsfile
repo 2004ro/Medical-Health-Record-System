@@ -173,10 +173,10 @@ pipeline {
                 echo "======== Performing health checks ========"
                 script {
                     sh '''
-                        echo "Checking service health (Posix Loop)..."
+                        echo "Checking service health (Docker Exec)..."
                         i=1
                         while [ $i -le 30 ]; do
-                            if curl -f http://localhost:8082/api/v1/patients/health/check 2>/dev/null; then
+                            if docker exec mhrs-patient-service curl -f http://localhost:8082/api/v1/patients/health/check > /dev/null 2>&1; then
                                 echo "✓ Service is healthy!"
                                 exit 0
                             fi
@@ -185,6 +185,8 @@ pipeline {
                             i=$((i+1))
                         done
                         echo "✗ Health check failed after 30 attempts"
+                        echo "Container logs:"
+                        docker logs mhrs-patient-service
                         exit 1
                     '''
                 }
