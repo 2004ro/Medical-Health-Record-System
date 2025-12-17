@@ -153,7 +153,8 @@ pipeline {
                                 -e SPRING_DATASOURCE_URL=jdbc:mysql://mhrs-mysql:3306/medical_health_record \\
                                 -e SPRING_DATASOURCE_USERNAME=mhrs_user \\
                                 -e SPRING_DATASOURCE_PASSWORD=mhrs_password \\
-                                -p 8082:8082 \\
+                                -e SERVER_PORT=8083 \\
+                                -p 8082:8083 \\
                                 ${SERVICE_NAME}:${IMAGE_TAG}
                                 
                             echo "Waiting for service to start..."
@@ -176,7 +177,7 @@ pipeline {
                         echo "Checking service health (Docker Exec)..."
                         i=1
                         while [ $i -le 30 ]; do
-                            if docker exec mhrs-patient-service curl -f http://localhost:8082/api/v1/patients/health/check > /dev/null 2>&1; then
+                            if docker exec mhrs-patient-service curl -f http://localhost:8083/api/v1/patients/health/check > /dev/null 2>&1; then
                                 echo "✓ Service is healthy!"
                                 exit 0
                             fi
