@@ -118,25 +118,51 @@ pipeline {
             steps {
                 echo "======== Deploying to ${ENVIRONMENT} environment (Docker Compose v2) ========"
                 script {
-                    sh 'docker compose version'
                     if (params.ENVIRONMENT == 'DEV') {
                         sh '''
-                            # Stop and remove existing containers
-                            docker compose -f docker-compose.yml down || true
+                            echo "Deploying using manual docker commands..."
                             
-                            # Start services
-                            docker compose -f docker-compose.yml up -d
+                            # Create network if not exists
+                            docker network create mhrs-network || true
                             
-                            # Wait for services to be ready
-                            echo "Waiting for services to start..."
+                            # Clean up old containers
+                            docker rm -f mhrs-patient-service mhrs-mysql || true
+                            
+                            # Start MySQL
+                            echo "Starting MySQL..."
+                            docker run -d \\
+                                --name mhrs-mysql \\
+                                --network mhrs-network \\
+                                -e MYSQL_ROOT_PASSWORD=root123 \\
+                                -e MYSQL_DATABASE=medical_health_record \\
+                                -e MYSQL_USER=mhrs_user \\
+                                -e MYSQL_PASSWORD=mhrs_password \\
+                                -p 3306:3306 \\
+                                -v mysql-data:/var/lib/mysql \\
+                                mysql:8.0
+                                
+                            # Wait for MySQL to be ready (simple sleep as healthcheck logic is complex in shell)
+                            echo "Waiting for MySQL to initialize..."
+                            sleep 20
+                            
+                            # Start Patient Service
+                            echo "Starting Patient Service..."
+                            docker run -d \\
+                                --name mhrs-patient-service \\
+                                --network mhrs-network \\
+                                -e SPRING_DATASOURCE_URL=jdbc:mysql://mhrs-mysql:3306/medical_health_record \\
+                                -e SPRING_DATASOURCE_USERNAME=mhrs_user \\
+                                -e SPRING_DATASOURCE_PASSWORD=mhrs_password \\
+                                -p 8082:8082 \\
+                                ${SERVICE_NAME}:${IMAGE_TAG}
+                                
+                            echo "Waiting for service to start..."
                             sleep 15
                         '''
                     } else if (params.ENVIRONMENT == 'STAGING') {
                         echo "Deploying to staging environment"
-                        // Add staging deployment commands
                     } else if (params.ENVIRONMENT == 'PROD') {
                         echo "Deploying to production environment"
-                        // Add production deployment commands
                     }
                 }
             }
