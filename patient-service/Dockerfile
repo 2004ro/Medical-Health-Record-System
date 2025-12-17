@@ -24,13 +24,16 @@ WORKDIR /app
 
 COPY --from=builder /app/target/${JAR_FILE} app.jar
 
+# Install curl for health check
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -m -s /bin/bash appuser
 USER appuser
 
 EXPOSE 8082
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD java -jar app.jar --help &>/dev/null || exit 1
+    CMD curl -f http://localhost:8082/api/v1/patients/health/check || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
 CMD []
