@@ -174,13 +174,15 @@ pipeline {
                 script {
                     sh '''
                         echo "Checking service health..."
-                        for i in {1..30}; do
+                        i=1
+                        while [ $i -le 30 ]; do
                             if curl -f http://localhost:8082/api/v1/patients/health/check 2>/dev/null; then
                                 echo "✓ Service is healthy!"
                                 exit 0
                             fi
                             echo "Attempt $i/30 - Service not ready yet, retrying..."
                             sleep 2
+                            i=$((i+1))
                         done
                         echo "✗ Health check failed after 30 attempts"
                         exit 1
