@@ -173,7 +173,7 @@ pipeline {
                 echo "======== Performing health checks ========"
                 script {
                     sh '''
-                        echo "Checking service health..."
+                        echo "Checking service health (Posix Loop)..."
                         i=1
                         while [ $i -le 30 ]; do
                             if curl -f http://localhost:8082/api/v1/patients/health/check 2>/dev/null; then
