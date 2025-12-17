@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'your-dockerhub-username'
+        DOCKER_HUB_REPO = '2004ro'
         SERVICE_NAME = 'mhrs-patient-service'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKER_IMAGE = "${DOCKER_HUB_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
@@ -17,7 +17,7 @@ pipeline {
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['DEV', 'STAGING', 'PROD'], description: 'Target environment')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
-        booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: false, description: 'Push image to Docker Hub')
+        booleanParam(name: 'PUSH_TO_DOCKERHUB', defaultValue: true, description: 'Push image to Docker Hub')
     }
 
     tools {
