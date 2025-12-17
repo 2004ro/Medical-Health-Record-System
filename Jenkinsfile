@@ -121,10 +121,10 @@ pipeline {
                     if (params.ENVIRONMENT == 'DEV') {
                         sh '''
                             # Stop and remove existing containers
-                            docker-compose -f docker-compose.yml down || true
+                            docker compose -f docker-compose.yml down || true
                             
                             # Start services
-                            docker-compose -f docker-compose.yml up -d
+                            docker compose -f docker-compose.yml up -d
                             
                             # Wait for services to be ready
                             echo "Waiting for services to start..."
