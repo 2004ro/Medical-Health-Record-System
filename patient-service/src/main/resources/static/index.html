@@ -40,6 +40,14 @@
                     <i class="fa-solid fa-gear"></i>
                     <span>Settings</span>
                 </a>
+                <a href="#" class="nav-item" onclick="showSection('lab-results')">
+                    <i class="fa-solid fa-flask"></i>
+                    <span>Lab Results</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('revenue')">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Revenue</span>
+                </a>
             </nav>
 
             <div class="user-profile">
@@ -70,21 +78,21 @@
                         <div class="icon-box green"><i class="fa-solid fa-calendar-day"></i></div>
                         <div class="stat-info">
                             <h3>Today's Visits</h3>
-                            <p>12</p>
+                            <p id="todayVisitsCount">0</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="icon-box orange"><i class="fa-solid fa-flask"></i></div>
                         <div class="stat-info">
                             <h3>Lab Results</h3>
-                            <p>5 Pending</p>
+                            <p id="labResultsCount">0 Pending</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="icon-box purple"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                         <div class="stat-info">
                             <h3>Revenue</h3>
-                            <p>$4,250</p>
+                            <p id="revenueAmount">$0</p>
                         </div>
                     </div>
                 </div>
@@ -208,6 +216,60 @@
                             </div>
                         </form>
                     </div>
+                </div>
+            </section>
+
+            <!-- Section: Lab Results -->
+            <section id="lab-results" class="content-section">
+                <div class="section-header">
+                    <h2>Lab Results</h2>
+                    <button class="add-patient-btn" onclick="openLabModal()"><i class="fa-solid fa-plus"></i> Add
+                        Result</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Test Name</th>
+                                <th>Result</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="labResultsTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section: Revenue -->
+            <section id="revenue" class="content-section">
+                <div class="section-header">
+                    <h2>Revenue & Billing</h2>
+                    <button class="add-patient-btn" onclick="openBillModal()"><i class="fa-solid fa-plus"></i> Add
+                        Bill</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient Name</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenueTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </main>
@@ -439,6 +501,104 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Lab Modal -->
+    <div class="modal" id="addLabModal">
+        <div class="modal-content" style="max-width: 500px">
+            <div class="modal-header">
+                <h2>Add Lab Result</h2>
+                <button class="close-btn" onclick="closeLabModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLabForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label>Patient Name</label>
+                            <select name="patientId" id="labPatientSelect" required onchange="setPatientName('lab')">
+                                <option value="">Select Patient</option>
+                            </select>
+                            <input type="hidden" name="patientName" id="labPatientNameHidden">
+                        </div>
+                        <div class="form-group">
+                            <label>Test Name</label>
+                            <input type="text" name="testName" required placeholder="e.g. Blood Test">
+                        </div>
+                        <div class="form-group">
+                            <label>Result</label>
+                            <input type="text" name="result" placeholder="e.g. Normal, 120mg/dL">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="PENDING">Pending</option>
+                                <option value="COMPLETED">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="testDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes</label>
+                            <textarea name="notes"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeLabModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Result</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bill Modal -->
+    <div class="modal" id="addBillModal">
+        <div class="modal-content" style="max-width: 500px">
+            <div class="modal-header">
+                <h2>Add Transaction</h2>
+                <button class="close-btn" onclick="closeBillModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBillForm">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="form-group">
+                            <label>Patient Name</label>
+                            <select name="patientId" id="billPatientSelect" required onchange="setPatientName('bill')">
+                                <option value="">Select Patient</option>
+                            </select>
+                            <input type="hidden" name="patientName" id="billPatientNameHidden">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" name="description" required placeholder="e.g. Consultation Fee">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount ($)</label>
+                            <input type="number" name="amount" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="PENDING">Pending</option>
+                                <option value="PAID">Paid</option>
+                                <option value="UNPAID">Unpaid</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" name="billDate" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeBillModal()">Cancel</button>
+                        <button type="submit" class="btn-submit">Save Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
     <script src="app.js"></script>
 </body>

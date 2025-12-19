@@ -7,6 +7,8 @@ let allPatients = [];
 document.addEventListener('DOMContentLoaded', () => {
     fetchPatients();
     fetchAppointments();
+    fetchLabResults();
+    fetchBills();
 });
 
 
@@ -51,8 +53,15 @@ async function fetchPatients() {
 }
 
 // Update Dashboard Stats
-function updateDashboardStats(patients) {
+// Update Dashboard Stats
+function updateDashboardStats(patients, appointments) {
     if (patients) document.getElementById('totalPatientsCount').innerText = patients.length;
+
+    if (appointments) {
+        const today = new Date().toISOString().split('T')[0];
+        const todaysVisits = appointments.filter(app => app.appointmentTime.startsWith(today)).length;
+        document.getElementById('todayVisitsCount').innerText = todaysVisits;
+    }
 }
 
 function renderRecentPatients(patients) {
@@ -404,4 +413,149 @@ if (globalSearchInput) {
         );
         renderAllPatients(filtered);
     });
+}
+
+const LAB_API_URL = '/api/v1/lab-results';
+const BILL_API_URL = '/api/v1/bills';
+
+async function fetchLabResults() {
+    try {
+        const res = await fetch(LAB_API_URL);
+        const data = await res.json();
+        renderLabResults(data);
+
+        // Update Dashboard Stat
+        const pending = data.filter(d => d.status === 'PENDING').length;
+        document.getElementById('labResultsCount').innerText = `${pending} Pending`;
+    } catch (e) { console.error(e); }
+}
+
+async function fetchBills() {
+    try {
+        const res = await fetch(BILL_API_URL);
+        const data = await res.json();
+        renderBills(data);
+
+        // Update Dashboard Stat
+        const total = data.filter(d => d.status === 'PAID').reduce((sum, item) => sum + item.amount, 0);
+        document.getElementById('revenueAmount').innerText = `$${total.toLocaleString()}`;
+    } catch (e) { console.error(e); }
+}
+
+function renderLabResults(data) {
+    const tbody = document.getElementById('labResultsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${item.id}</td>
+            <td>${item.patientName || 'Unknown'}</td>
+            <td>${item.testName}</td>
+            <td>${item.result || '-'}</td>
+            <td>${item.testDate}</td>
+            <td><span class="status-badge ${item.status === 'COMPLETED' ? 'active-status' : ''}">${item.status}</span></td>
+            <td><button class="action-btn" onclick="deleteLab(${item.id})"><i class="fa-solid fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderBills(data) {
+    const tbody = document.getElementById('revenueTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${item.id}</td>
+            <td>${item.patientName || 'Unknown'}</td>
+            <td>${item.description}</td>
+            <td>$${item.amount}</td>
+            <td><span class="status-badge ${item.status === 'PAID' ? 'active-status' : ''}">${item.status}</span></td>
+            <td>${item.billDate}</td>
+            <td><button class="action-btn" onclick="deleteBill(${item.id})"><i class="fa-solid fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Modal Logic
+function openLabModal() {
+    populatePatientSelects();
+    document.getElementById('addLabModal').classList.add('active');
+}
+function closeLabModal() {
+    document.getElementById('addLabModal').classList.remove('active');
+}
+
+function openBillModal() {
+    populatePatientSelects();
+    document.getElementById('addBillModal').classList.add('active');
+}
+function closeBillModal() {
+    document.getElementById('addBillModal').classList.remove('active');
+}
+
+function populatePatientSelects() {
+    const labSelect = document.getElementById('labPatientSelect');
+    const billSelect = document.getElementById('billPatientSelect');
+
+    // Safety check if allPatients isn't loaded yet
+    const patients = allPatients || [];
+
+    const options = '<option value="">Select Patient</option>' +
+        patients.map(p => `<option value="${p.patientId}" data-name="${p.firstName} ${p.lastName}">${p.firstName} ${p.lastName} (${p.patientUniqueId})</option>`).join('');
+
+    if (labSelect) labSelect.innerHTML = options;
+    if (billSelect) billSelect.innerHTML = options;
+}
+
+function setPatientName(type) {
+    const select = document.getElementById(type === 'lab' ? 'labPatientSelect' : 'billPatientSelect');
+    const name = select.options[select.selectedIndex].getAttribute('data-name');
+    document.getElementById(type === 'lab' ? 'labPatientNameHidden' : 'billPatientNameHidden').value = name;
+}
+
+// Form Submit Handlers
+const labForm = document.getElementById('addLabForm');
+if (labForm) {
+    labForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target));
+        await fetch(LAB_API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+        });
+        closeLabModal();
+        fetchLabResults();
+        e.target.reset();
+    });
+}
+
+const billForm = document.getElementById('addBillForm');
+if (billForm) {
+    billForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target));
+        await fetch(BILL_API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+        });
+        closeBillModal();
+        fetchBills();
+        e.target.reset();
+    });
+}
+
+async function deleteLab(id) {
+    if (confirm('Delete this result?')) {
+        await fetch(`${LAB_API_URL}/${id}`, { method: 'DELETE' });
+        fetchLabResults();
+    }
+}
+
+async function deleteBill(id) {
+    if (confirm('Delete this transaction?')) {
+        await fetch(`${BILL_API_URL}/${id}`, { method: 'DELETE' });
+        fetchBills();
+    }
 }
