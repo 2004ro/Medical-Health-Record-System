@@ -243,22 +243,26 @@ if (localStorage.getItem('theme') === 'dark') {
 
 // Fetch Patient Name by Unique ID
 async function fetchPatientName() {
-    const uniqueId = document.getElementById('appPatientId').value.trim();
+    const searchInput = document.getElementById('appPatientSearchInput');
+    const uniqueId = searchInput.value.trim();
     const nameField = document.getElementById('appPatientName');
+    const hiddenIdField = document.getElementById('appHiddenPatientId');
 
     if (!uniqueId) {
         nameField.value = '';
+        if (hiddenIdField) hiddenIdField.value = '';
         return;
     }
 
     // Since we have all patients loaded, we can filter client-side first for speed
-    // and falling back to backend if needed (though user likely just wants it to work now)
     const patient = allPatients.find(p => p.patientUniqueId === uniqueId);
 
     if (patient) {
         nameField.value = `${patient.firstName} ${patient.lastName}`;
+        if (hiddenIdField) hiddenIdField.value = patient.patientId;
     } else {
         nameField.value = "Patient Not Found";
+        if (hiddenIdField) hiddenIdField.value = '';
     }
 }
 
@@ -346,6 +350,9 @@ document.getElementById('addAppointmentForm').addEventListener('submit', async (
     // Add default status
     data.status = "SCHEDULED";
 
+    // Ensure appointmentTime is in proper format if needed
+    // But datetime-local usually works fine with standard Spring boot ISO handling if localdatetime is used.
+
     try {
         const response = await fetch(APPT_API_URL, {
             method: 'POST',
@@ -359,6 +366,7 @@ document.getElementById('addAppointmentForm').addEventListener('submit', async (
             fetchAppointments();
             e.target.reset();
         } else {
+            console.error(await response.text()); // Log server error for debugging
             alert('Failed to book appointment');
         }
     } catch (error) {
@@ -375,22 +383,25 @@ async function deleteAppointment(id) {
 }
 
 // Global Search
-document.getElementById('globalSearch').addEventListener('keyup', (e) => {
-    const query = e.target.value.toLowerCase();
+const globalSearchInput = document.getElementById('globalSearch');
+if (globalSearchInput) {
+    globalSearchInput.addEventListener('keyup', (e) => {
+        const query = e.target.value.toLowerCase();
 
-    // Switch to patients tab if not active
-    if (!document.getElementById('patients').classList.contains('active')) {
-        showSection('patients');
-        // Update nav active state
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        document.querySelectorAll('.nav-item')[1].classList.add('active'); // 2nd item is Patients
-    }
+        // Switch to patients tab if not active
+        if (!document.getElementById('patients').classList.contains('active')) {
+            showSection('patients');
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[1].classList.add('active'); // 2nd item is Patients
+        }
 
-    const filtered = allPatients.filter(p =>
-        p.firstName.toLowerCase().includes(query) ||
-        p.lastName.toLowerCase().includes(query) ||
-        p.email.toLowerCase().includes(query) ||
-        p.patientUniqueId.toLowerCase().includes(query)
-    );
-    renderAllPatients(filtered);
-});
+        const filtered = allPatients.filter(p =>
+            p.firstName.toLowerCase().includes(query) ||
+            p.lastName.toLowerCase().includes(query) ||
+            p.email.toLowerCase().includes(query) ||
+            p.patientUniqueId.toLowerCase().includes(query)
+        );
+        renderAllPatients(filtered);
+    });
+}
